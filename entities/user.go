@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -12,21 +13,26 @@ type User struct {
 	FirstName string    `json:"firstName" gorm:"type:varchar(255);not null"`
 	LastName  string    `json:"lastName" gorm:"type:varchar(255);not null"`
 	Email     string    `json:"email" gorm:"type:varchar(255);uniqueIndex;not null"`
-	Password  string    `json:"-" gorm:"type:varchar(255);not null"`
+	Password  string    `json:"password" gorm:"type:varchar(255);not null"`
 	Premium   bool      `json:"premium" gorm:"bool"`
 	Phone     string    `json:"phone" gorm:"type:varchar(255)"`
 	BirthDate time.Time `json:"birthDate"`
-	Albums    []Album
+	Albums    []Album   `json:"albums"`
 }
 
-func (user *User) Prepare() error {
-	passwordBytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+	passwordBytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 
 	if err != nil {
+		fmt.Println("[ERROR]:", err)
 		return err
 	}
 
-	user.Password = string(passwordBytes)
+	u.Password = string(passwordBytes)
 
-	return nil
+	return
+}
+
+func (u *User) CheckPass(password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
 }
