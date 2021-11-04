@@ -34,5 +34,25 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusCreated, user)
+}
+
+
+func HandlerShow(c *gin.Context) {
+	db := database.GetDatabase()
+	userId := c.GetUint("authId")
+
+	var user entities.User
+
+	if db.Where("ID = ?", userId).First(&user).Error != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "USER_NOT_FOUND",
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"user": user,
+	})
 }

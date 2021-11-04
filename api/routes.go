@@ -3,6 +3,9 @@ package api
 import (
 	"net/http"
 
+	"github.com/antunesgabriel/babytl_backend/albums"
+	"github.com/antunesgabriel/babytl_backend/api/middlewares"
+	"github.com/antunesgabriel/babytl_backend/auth"
 	"github.com/antunesgabriel/babytl_backend/users"
 	"github.com/gin-gonic/gin"
 )
@@ -19,11 +22,22 @@ func ConfigureRoutes(router *gin.Engine) *gin.Engine {
 			})
 		}
 
-		usersGroup := firstVersion.Group("users")
+		authGroup := firstVersion.Group("auth")
 		{
-			usersGroup.POST("", users.HandlerStore)
+			authGroup.POST("local", auth.HandlerLoginWithEmail)
 		}
 
+		userGroup := firstVersion.Group("users")
+		{
+			userGroup.POST("", users.HandlerStore)
+			userGroup.GET("me", middlewares.AuthMiddleware(), users.HandlerShow)
+		}
+
+		albumGroup := firstVersion.Group("albums", middlewares.AuthMiddleware())
+		{
+			albumGroup.GET("", albums.HandlerIndex)
+			albumGroup.POST("", albums.HandlerStore)
+		}
 	}
 
 	return router
