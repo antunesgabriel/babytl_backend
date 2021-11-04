@@ -6,6 +6,8 @@ import (
 	"github.com/antunesgabriel/babytl_backend/albums"
 	"github.com/antunesgabriel/babytl_backend/api/middlewares"
 	"github.com/antunesgabriel/babytl_backend/auth"
+	"github.com/antunesgabriel/babytl_backend/snaps"
+	"github.com/antunesgabriel/babytl_backend/solicitations"
 	"github.com/antunesgabriel/babytl_backend/users"
 	"github.com/gin-gonic/gin"
 )
@@ -39,6 +41,18 @@ func ConfigureRoutes(router *gin.Engine) *gin.Engine {
 			albumGroup.POST("", albums.HandlerStore)
 			albumGroup.DELETE(":albumId", albums.HandlerDestroy)
 			albumGroup.PUT(":albumId", albums.HandlerUpdate)
+		}
+
+		solicitationGroup := firstVersion.Group("socilicitations", middlewares.AuthMiddleware())
+		{
+			solicitationGroup.POST("", solicitations.HandlerStore)
+		}
+
+		snapsGroup := firstVersion.Group("snaps", middlewares.AuthMiddleware())
+		{
+			snapsGroup.GET("", snaps.HandlerIndex)
+			snapsGroup.POST("", snaps.HandlerStore)
+			snapsGroup.DELETE(":snapId", snaps.HandlerDestroy)
 		}
 	}
 

@@ -18,6 +18,7 @@ type User struct {
 	Phone     string    `json:"phone" gorm:"type:varchar(255)"`
 	BirthDate time.Time `json:"birthDate"`
 	Albums    []Album   `json:"albums"`
+	Solicitations []Solicitation `json:"solicitations"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {

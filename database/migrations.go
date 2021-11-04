@@ -8,7 +8,7 @@ import (
 )
 
 func RunMigration(db *gorm.DB) {
-	err := db.AutoMigrate(&entities.User{}, &entities.Album{}, &entities.TimeLine{}, &entities.Solicitation{})
+	err := db.AutoMigrate(&entities.User{}, &entities.Album{}, &entities.Snap{}, &entities.Solicitation{})
 
 	fmt.Println("Run")
 
