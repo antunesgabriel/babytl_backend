@@ -1,8 +1,10 @@
 package entities
 
+import "gorm.io/gorm"
+
 type TimeLine struct {
-	Base
-	SnapUrl    string `json:"snapUrl" gorm:"type:varchar(255);not null"`
-	ChildrenID string
-	Children   Children `json:"children" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	gorm.Model
+	SnapUrl string `json:"snapUrl" gorm:"type:varchar(255);not null"`
+	AlbumID uint
+	Album   Album `json:"album" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

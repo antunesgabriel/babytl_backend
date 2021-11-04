@@ -1,11 +1,15 @@
 package entities
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Solicitation struct {
-	Base
-	AttendedAt time.Timer `json:"attendedAt" gorm:"type:datetime"`
-	FilesUrl   string     `json:"filesUrl" gorm:"type:varchar(255)"`
-	UserID     string
-	User       User `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	gorm.Model
+	AttendedAt time.Time `json:"attendedAt"`
+	ZipUrl     string    `json:"zipUrl" gorm:"type:varchar(255)"`
+	UserID     uint
+	User       User `json:"user" gorm:"foreignKey:UserID"`
 }
