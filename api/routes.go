@@ -37,6 +37,8 @@ func ConfigureRoutes(router *gin.Engine) *gin.Engine {
 		{
 			albumGroup.GET("", albums.HandlerIndex)
 			albumGroup.POST("", albums.HandlerStore)
+			albumGroup.DELETE(":albumId", albums.HandlerDestroy)
+			albumGroup.PUT(":albumId", albums.HandlerUpdate)
 		}
 	}
 
