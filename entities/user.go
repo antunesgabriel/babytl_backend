@@ -10,14 +10,15 @@ import (
 
 type User struct {
 	gorm.Model
-	FirstName string    `json:"firstName" gorm:"type:varchar(255);not null"`
-	LastName  string    `json:"lastName" gorm:"type:varchar(255);not null"`
-	Email     string    `json:"email" gorm:"type:varchar(255);uniqueIndex;not null"`
-	Password  string    `json:"password" gorm:"type:varchar(255);not null"`
-	Premium   bool      `json:"premium" gorm:"bool"`
-	Phone     string    `json:"phone" gorm:"type:varchar(255)"`
-	BirthDate time.Time `json:"birthDate"`
-	Albums    []Album   `json:"albums"`
+	FirstName     string         `json:"firstName" gorm:"type:varchar(255);not null"`
+	LastName      string         `json:"lastName" gorm:"type:varchar(255);not null"`
+	Email         string         `json:"email" gorm:"type:varchar(255);uniqueIndex;not null"`
+	FirebaseId    string         `json:"firebaseId" gorm:"type:varchar(255)"`
+	Password      string         `json:"password" gorm:"type:varchar(255);not null"`
+	Premium       bool           `json:"premium" gorm:"bool"`
+	Phone         string         `json:"phone" gorm:"type:varchar(255)"`
+	BirthDate     time.Time      `json:"birthDate"`
+	Albums        []Album        `json:"albums"`
 	Solicitations []Solicitation `json:"solicitations"`
 }
 

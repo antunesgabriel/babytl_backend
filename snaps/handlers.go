@@ -170,7 +170,7 @@ func workerUpload(dir string, snapId uint) {
 		return
 	}
 
-	fileUrl, errUpload := s3Handler.UploadFile("snap"+fmt.Sprint(snapId), dir, FOLDER)
+	fileUrl, errUpload := s3Handler.UploadFile(dir, FOLDER)
 
 	if errUpload != nil {
 		log.Fatalf("error on upload s3: %v", errUpload)

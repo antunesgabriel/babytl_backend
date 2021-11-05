@@ -39,7 +39,7 @@ func NewS3Handler() (*S3Handler, error) {
 	return &handler, err
 }
 
-func (h *S3Handler) UploadFile(key string, filename string, folder string) (string, error) {
+func (h *S3Handler) UploadFile(filename string, folder string) (string, error) {
 
 	uploader := s3manager.NewUploader(h.Session)
 

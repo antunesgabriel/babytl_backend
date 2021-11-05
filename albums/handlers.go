@@ -1,28 +1,58 @@
 package albums
 
 import (
+	"fmt"
+	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/antunesgabriel/babytl_backend/database"
 	"github.com/antunesgabriel/babytl_backend/entities"
+	"github.com/antunesgabriel/babytl_backend/utils"
 	"github.com/gin-gonic/gin"
 )
+
+const FOLDER = "thumbs"
 
 func HandlerStore(c *gin.Context) {
 	db := database.GetDatabase()
 	var album entities.Album
 	var user entities.User
 
-	if c.ShouldBindJSON(&album) != nil {
+	title := c.PostForm("title")
+	gender := c.PostForm("gender")
+	authId := c.GetUint("authId")
+
+	thumbFile, err := c.FormFile("thumb")
+
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": "INVALID_FIELDS",
+			"message": "INVALID_PARAMS",
 		})
 
 		return
 	}
 
-	authId := c.GetUint("authId")
+	oldFilename := filepath.Base(thumbFile.Filename)
+	ext := filepath.Ext(oldFilename)
+
+	timeUnix := time.Now().Unix()
+
+	newFileName := fmt.Sprint("user_id_", authId, "_album_", title, "_", timeUnix, ext)
+
+	dir := filepath.Join("tmp", newFileName)
+
+	if errUpload := c.SaveUploadedFile(thumbFile, dir); errUpload != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":    "INTERNAL",
+			"_details": errUpload.Error(),
+		})
+
+		return
+	}
 
 	if db.Where("ID = ?", authId).First(&user).Error != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -32,6 +62,8 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
+	album.Title = title
+	album.Gender = gender
 	album.UserID = user.ID
 	album.User = user
 
@@ -43,13 +75,7 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
-	if db.Save(&album).Error != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": "Falha ao salvar album",
-		})
-
-		return
-	}
+	go workerUpload(dir, album.ID)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "CREATED",
@@ -120,7 +146,7 @@ func HandlerUpdate(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "UPDATED",
-		"album": album,
+		"album":   album,
 	})
 }
 
@@ -148,6 +174,46 @@ func HandlerDestroy(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "DELETED",
-		"album": album,
+		"album":   album,
 	})
+}
+
+func workerUpload(dir string, albumId uint) {
+	fmt.Println("INIT ROUTINE")
+	defer fmt.Println("FINISH ROUTINE")
+
+	db := database.GetDatabase()
+	var album entities.Album
+
+	if db.First(&album, albumId).Error != nil {
+		log.Fatalln("error on acess album")
+
+		return
+	}
+
+	s3Handler, err := utils.NewS3Handler()
+
+	if err != nil {
+		log.Fatalf("[error] on connect s3: %s", err.Error())
+
+		return
+	}
+
+	fileUrl, errUpload := s3Handler.UploadFile(dir, FOLDER)
+
+	if errUpload != nil {
+		log.Fatalf("error on upload s3: %v", errUpload)
+
+		return
+	}
+
+	album.ThumbUrl = fileUrl
+
+	db.Save(&album)
+
+	errRemove := os.Remove(dir)
+
+	if errRemove != nil {
+		fmt.Println("error on remove file to tmp", errRemove)
+	}
 }
