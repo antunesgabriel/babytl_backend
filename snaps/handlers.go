@@ -2,15 +2,20 @@ package snaps
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
 
 	"github.com/antunesgabriel/babytl_backend/database"
 	"github.com/antunesgabriel/babytl_backend/entities"
+	"github.com/antunesgabriel/babytl_backend/utils"
 	"github.com/gin-gonic/gin"
 )
+
+const FOLDER = "snaps"
 
 func HandlerIndex(c *gin.Context) {
 	db := database.GetDatabase()
@@ -77,16 +82,15 @@ func HandlerStore(c *gin.Context) {
 
 	if errUpload := c.SaveUploadedFile(snapFile, dir); errUpload != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": "INTERNAL",
+			"error":    "INTERNAL",
 			"_details": errUpload.Error(),
 		})
 
 		return
 	}
-	
 
 	var snap entities.Snap
-	var album entities.Album 
+	var album entities.Album
 
 	if db.First(&album, albumId).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -102,14 +106,14 @@ func HandlerStore(c *gin.Context) {
 
 	if db.Create(&snap).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": "INTERNAL",
+			"error":    "INTERNAL",
 			"_details": "On insert",
 		})
 
 		return
 	}
 
-	//TODO: routine to deploy to s3 and clear item
+	go workerUpload(dir, snap.ID)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "CREATED",
@@ -133,7 +137,7 @@ func HandlerDestroy(c *gin.Context) {
 
 	if db.Where("ID = ?", snapId).Delete(&snap).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": "INTERNAL",
+			"error":    "INTERNAL",
 			"_details": "On delete",
 		})
 
@@ -143,4 +147,44 @@ func HandlerDestroy(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "SUCCESS",
 	})
+}
+
+func workerUpload(dir string, snapId uint) {
+	fmt.Println("INIT ROUTINE")
+	defer fmt.Println("FINISH ROUTINE")
+
+	db := database.GetDatabase()
+	var snap entities.Snap
+
+	if db.First(&snap, snapId).Error != nil {
+		log.Fatalln("error on acess snap")
+
+		return
+	}
+
+	s3Handler, err := utils.NewS3Handler()
+
+	if err != nil {
+		log.Fatalf("[error] on connect s3: %s", err.Error())
+
+		return
+	}
+
+	fileUrl, errUpload := s3Handler.UploadFile("snap"+fmt.Sprint(snapId), dir, FOLDER)
+
+	if errUpload != nil {
+		log.Fatalf("error on upload s3: %v", errUpload)
+
+		return
+	}
+
+	snap.SnapUrl = fileUrl
+
+	db.Save(&snap)
+
+	errRemove := os.Remove(dir)
+
+	if errRemove != nil {
+		fmt.Println("error on remove file to tmp", errRemove)
+	}
 }

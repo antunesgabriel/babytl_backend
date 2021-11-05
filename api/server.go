@@ -21,7 +21,7 @@ func BuildServer() Server {
 
 func (s *Server) Run() {
 	router := ConfigureRoutes(s.server)
-	
+
 	log.Fatalln(router.Run(":" + s.port))
 	fmt.Println("Server listen in port: 5000")
 }
