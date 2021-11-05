@@ -3,3 +3,4 @@ docker/data/*
 .env
 tmp/*
 logs/*
+bin/
