@@ -30,8 +30,8 @@ func (j *JWTConfig) GenerateToken(id uint) (string, error) {
 		id,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24 * 30).Unix(),
-			Issuer: j.issure,
-			IssuedAt: time.Now().Unix(),
+			Issuer:    j.issure,
+			IssuedAt:  time.Now().Unix(),
 		},
 	}
 

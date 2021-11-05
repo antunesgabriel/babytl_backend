@@ -11,10 +11,10 @@ import (
 
 const (
 	PREMIUM_WAIT_HOURS = time.Hour * 24 * 30
-	NORMAL_WAIT_HOURS = time.Hour * 24 * 30 * 3
+	NORMAL_WAIT_HOURS  = time.Hour * 24 * 30 * 3
 )
 
-func HandlerStore (c *gin.Context) {
+func HandlerStore(c *gin.Context) {
 	db := database.GetDatabase()
 	authId := c.GetUint("authId")
 
@@ -64,7 +64,7 @@ func HandlerStore (c *gin.Context) {
 
 				return
 			}
-			
+
 		} else {
 			nextDateToSolicitation := lastSolicitationDate.Add(NORMAL_WAIT_HOURS)
 
@@ -80,11 +80,11 @@ func HandlerStore (c *gin.Context) {
 		}
 	}
 
-	var newSolicitation  entities.Solicitation
+	var newSolicitation entities.Solicitation
 
 	if db.Model(&user).Association("Solicitations").Append(&newSolicitation) != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": "INTERNAL",
+			"error":    "INTERNAL",
 			"_datails": "On append new solicitation",
 		})
 
@@ -98,7 +98,7 @@ func HandlerStore (c *gin.Context) {
 	})
 }
 
-func validateToNewSolicictation (nextDateToSolicitation time.Time) (string, bool) {
+func validateToNewSolicictation(nextDateToSolicitation time.Time) (string, bool) {
 	now := time.Now()
 
 	if !now.After(nextDateToSolicitation) {
@@ -117,5 +117,5 @@ func buildMessageDiff(diff time.Duration) (message string) {
 
 	message = "Sua próxima data de solicitação será no dia: " + date.Format("02/01/2006") + " ás: " + date.Format("15:04") + "hrs"
 
-	return 
+	return
 }

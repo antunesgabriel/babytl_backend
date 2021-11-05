@@ -23,7 +23,6 @@ func HandlerLoginWithEmail(c *gin.Context) {
 	var user entities.User
 	db := database.GetDatabase()
 
-
 	if err := db.Where("email = ?", authDTO.Email).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "USER_NOT_EXIST",
@@ -54,7 +53,7 @@ func HandlerLoginWithEmail(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"token": token,
-		"type": "Bearer",
+		"type":  "Bearer",
 	})
 
 }

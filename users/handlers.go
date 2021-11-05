@@ -37,7 +37,6 @@ func HandlerStore(c *gin.Context) {
 	c.JSON(http.StatusCreated, user)
 }
 
-
 func HandlerShow(c *gin.Context) {
 	db := database.GetDatabase()
 	userId := c.GetUint("authId")
