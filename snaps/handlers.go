@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -113,7 +114,7 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
-	go workerUpload(dir, snap.ID)
+	go workerUpload(dir, snap.ID, snap.AlbumID)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "CREATED",
@@ -149,7 +150,7 @@ func HandlerDestroy(c *gin.Context) {
 	})
 }
 
-func workerUpload(dir string, snapId uint) {
+func workerUpload(dir string, snapId uint, albumId uint) {
 	fmt.Println("INIT ROUTINE")
 	defer fmt.Println("FINISH ROUTINE")
 
@@ -170,7 +171,9 @@ func workerUpload(dir string, snapId uint) {
 		return
 	}
 
-	fileUrl, errUpload := s3Handler.UploadFile(dir, FOLDER)
+	folder := path.Join(FOLDER, fmt.Sprint("ALBUM_ID_", albumId))
+
+	fileUrl, errUpload := s3Handler.UploadFile(dir, folder)
 
 	if errUpload != nil {
 		log.Fatalf("error on upload s3: %v", errUpload)

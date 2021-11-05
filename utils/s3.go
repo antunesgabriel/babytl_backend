@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
@@ -67,6 +68,32 @@ func (h *S3Handler) UploadFile(filename string, folder string) (string, error) {
 	return fileUrl, errUpload
 }
 
-func (h *S3Handler) ReadFile(key string) {
-	//
+func (h *S3Handler) DownloadFiles(filesName []string, outPutDir string, folderInS3 string) error {
+	downloader := s3manager.NewDownloader(h.Session)
+
+	for _, fileName := range filesName {
+		filePathInS3 := path.Join(folderInS3, fileName)
+
+		f, err := os.Create(path.Join(outPutDir, fileName))
+
+		if err != nil {
+			f.Close()
+			return err
+		}
+
+		_, errDownload := downloader.Download(f, &s3.GetObjectInput{
+			Bucket: aws.String(h.Bucket),
+			Key:    aws.String(filePathInS3),
+		})
+
+		if errDownload != nil {
+			f.Close()
+			return errDownload
+		}
+
+		f.Close()
+	}
+
+	return nil
+
 }
