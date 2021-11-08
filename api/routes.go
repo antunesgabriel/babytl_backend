@@ -33,6 +33,7 @@ func ConfigureRoutes(router *gin.Engine) *gin.Engine {
 		{
 			userGroup.POST("", users.HandlerStore)
 			userGroup.GET("me", middlewares.AuthMiddleware(), users.HandlerShow)
+			userGroup.PUT("", middlewares.AuthMiddleware(), users.HandlerUpdate)
 		}
 
 		albumGroup := firstVersion.Group("albums", middlewares.AuthMiddleware())

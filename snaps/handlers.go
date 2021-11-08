@@ -72,6 +72,34 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
+	timeNow := time.Now()
+	year, month, day := timeNow.Date()
+	startDay := time.Date(year, month, day, 0, 0, 0, 0, timeNow.Location())
+	endDay := time.Date(year, month, day, 23, 59, 59, 0, timeNow.Location())
+
+	var snapExist entities.Snap
+
+	result := db.First(&snapExist, "created_at BETWEEN ? AND ?", startDay, endDay)
+
+	if result.Error != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":    "INTERNAL",
+			"_details": result.Error.Error(),
+		})
+
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error":    "Já foi feito um registro para o dia de hoje.",
+			"_details": result.Error.Error(),
+		})
+
+		return	
+	}
+
+
 	oldFilename := filepath.Base(snapFile.Filename)
 	ext := filepath.Ext(oldFilename)
 
@@ -90,8 +118,9 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
-	var snap entities.Snap
+	
 	var album entities.Album
+	var snap entities.Snap
 
 	if db.First(&album, albumId).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
