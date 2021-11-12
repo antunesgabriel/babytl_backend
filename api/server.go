@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,8 +14,14 @@ type Server struct {
 }
 
 func BuildServer() Server {
+	port := os.Getenv("BTL_PORT")
+
+	if port == "" {
+		log.Fatalln("BTL_PORT NOT DEFINED")
+	}
+
 	return Server{
-		"5000",
+		port,
 		gin.Default(),
 	}
 }
