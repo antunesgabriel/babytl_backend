@@ -1,1 +1,1 @@
-go build -o ./bin
+# algo aqui
