@@ -90,7 +90,7 @@ func HandlerIndex(c *gin.Context) {
 
 	if db.Where("user_id = ?", authId).Find(&albums).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": "Falha ao buscar albums",
+			"error": "INTERNAL",
 		})
 
 		return

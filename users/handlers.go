@@ -18,7 +18,7 @@ func HandlerStore(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Cannot bind JSON.",
+			"error": "INVALID_ARGUMENTS",
 		})
 
 		return
@@ -28,7 +28,7 @@ func HandlerStore(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusExpectationFailed, gin.H{
-			"error": err.Error(),
+			"error": "INTERNAL",
 		})
 
 		return
@@ -64,7 +64,7 @@ func HandlerUpdate(c *gin.Context) {
 	var user entities.User
 	var updateUserDTO UpdateUserDTO
 
-	if  c.ShouldBindJSON(&updateUserDTO) != nil {
+	if c.ShouldBindJSON(&updateUserDTO) != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "INVALID_PARAMS",
 		})
