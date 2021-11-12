@@ -14,7 +14,7 @@ type Server struct {
 }
 
 func BuildServer() Server {
-	port := os.Getenv("BTL_PORT")
+	port := os.Getenv("PORT")
 
 	if port == "" {
 		log.Fatalln("BTL_PORT NOT DEFINED")
