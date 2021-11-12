@@ -18,10 +18,11 @@ func StartDabate() {
 	user := os.Getenv("DB_USER")
 	pass := os.Getenv("DB_PASS")
 	dbName := os.Getenv("DB_NAME")
+	sslMode := os.Getenv("DB_SSLMODE")
 
 	var err error
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable", host, user, pass, dbName, port)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", host, user, pass, dbName, port, sslMode)
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
