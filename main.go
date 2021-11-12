@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/joho/godotenv"
 
@@ -10,10 +11,14 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
+	isHeroku := os.Getenv("BTL_SETUP")
 
-	if err != nil {
-		log.Fatalln(err)
+	if isHeroku == "" {
+		err := godotenv.Load()
+
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 	database.StartDabate()
