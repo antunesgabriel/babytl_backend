@@ -43,6 +43,13 @@ func HandlerStore(c *gin.Context) {
 
 	newFileName := fmt.Sprint("user_id_", authId, "_album_", title, "_", timeUnix, ext)
 
+	if err := os.MkdirAll("tmp", os.ModePerm); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":    "INTERNAL",
+			"_details": err.Error(),
+		})
+	}
+
 	dir := filepath.Join("tmp", newFileName)
 
 	if errUpload := c.SaveUploadedFile(thumbFile, dir); errUpload != nil {
