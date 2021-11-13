@@ -1,6 +1,7 @@
 package snaps
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	"github.com/antunesgabriel/babytl_backend/entities"
 	"github.com/antunesgabriel/babytl_backend/utils"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 const FOLDER = "snaps"
@@ -81,7 +83,7 @@ func HandlerStore(c *gin.Context) {
 
 	result := db.First(&snapExist, "created_at BETWEEN ? AND ?", startDay, endDay)
 
-	if result.Error != nil {
+	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":    "INTERNAL",
 			"_details": result.Error.Error(),
@@ -219,4 +221,49 @@ func workerUpload(dir string, snapId uint, albumId uint) {
 	if errRemove != nil {
 		fmt.Println("error on remove file to tmp", errRemove)
 	}
+}
+
+func HandlerShow (c *gin.Context) {
+	albumId, err := strconv.Atoi(c.Param("albumId"))
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "INVALID_PARAMS",
+		})
+
+		return
+	}
+
+	db := database.GetDatabase()
+
+	var snap entities.Snap
+
+	timeNow := time.Now()
+	year, month, day := timeNow.Date()
+
+	startDay := time.Date(year, month, day, 0, 0, 0, 0, timeNow.Location())
+	endDay := time.Date(year, month, day, 23, 59, 59, 0, timeNow.Location())
+
+	errFirst := db.First(&snap, "album_id = ? AND created_at BETWEEN ? AND ?", albumId, startDay, endDay).Error
+
+	if errFirst != nil {
+
+		if !errors.Is(errFirst, gorm.ErrRecordNotFound) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": "INTERNAL",
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusOK,  gin.H{
+			"snap": nil,
+		})
+		
+		return
+	}
+
+	c.JSON(http.StatusOK,  gin.H{
+		"snap": snap,
+	})
 }

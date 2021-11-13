@@ -54,6 +54,7 @@ func ConfigureRoutes(router *gin.Engine) *gin.Engine {
 			snapsGroup.GET("", snaps.HandlerIndex)
 			snapsGroup.POST("", snaps.HandlerStore)
 			snapsGroup.DELETE(":snapId", snaps.HandlerDestroy)
+			snapsGroup.GET(":albumId", snaps.HandlerShow)
 		}
 	}
 
