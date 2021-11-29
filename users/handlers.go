@@ -1,9 +1,11 @@
 package users
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 
 	"github.com/antunesgabriel/babytl_backend/database"
 	"github.com/antunesgabriel/babytl_backend/entities"
@@ -19,6 +21,26 @@ func HandlerStore(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "INVALID_ARGUMENTS",
+		})
+
+		return
+	}
+
+	var exist entities.User
+
+	result := db.First(&exist, "email = ?", user.Email)
+
+	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusExpectationFailed, gin.H{
+			"error": "INTERNAL",
+		})
+
+		return
+	}
+
+	if result.RowsAffected > 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "USER_EXISTS",
 		})
 
 		return
