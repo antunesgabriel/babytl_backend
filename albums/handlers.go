@@ -2,7 +2,6 @@ package albums
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,6 +12,7 @@ import (
 	"github.com/antunesgabriel/babytl_backend/entities"
 	"github.com/antunesgabriel/babytl_backend/utils"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 const FOLDER = "thumbs"
@@ -74,6 +74,20 @@ func HandlerStore(c *gin.Context) {
 	album.UserID = user.ID
 	album.User = user
 
+
+
+	thumbUrl, errUpload := workerUpload(dir, album.ID, db)
+
+	if errUpload != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "INTERNAL",
+		})
+
+		return
+	}
+
+	album.ThumbUrl = thumbUrl
+
 	if db.Create(&album).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": "Falha ao criar album",
@@ -81,8 +95,6 @@ func HandlerStore(c *gin.Context) {
 
 		return
 	}
-
-	go workerUpload(dir, album.ID)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "CREATED",
@@ -185,42 +197,30 @@ func HandlerDestroy(c *gin.Context) {
 	})
 }
 
-func workerUpload(dir string, albumId uint) {
-	fmt.Println("INIT ROUTINE")
-	defer fmt.Println("FINISH ROUTINE")
-
-	db := database.GetDatabase()
-	var album entities.Album
-
-	if db.First(&album, albumId).Error != nil {
-		log.Fatalln("error on acess album")
-
-		return
-	}
-
+func workerUpload(dir string, albumId uint, db *gorm.DB ) (string, error) {
 	s3Handler, err := utils.NewS3Handler()
 
 	if err != nil {
-		log.Fatalf("[error] on connect s3: %s", err.Error())
+		utils.RegisterLog("[UPLOAD ALBUM THUMB TO S3] Line 201:", err.Error())
 
-		return
+		return "", err
 	}
 
 	fileUrl, errUpload := s3Handler.UploadFile(dir, FOLDER)
 
 	if errUpload != nil {
-		log.Fatalf("error on upload s3: %v", errUpload)
+		utils.RegisterLog("[UPLOAD ALBUM THUMB TO S3] Line 209:", errUpload.Error())
 
-		return
+		return "", errUpload
 	}
-
-	album.ThumbUrl = fileUrl
-
-	db.Save(&album)
 
 	errRemove := os.Remove(dir)
 
 	if errRemove != nil {
-		fmt.Println("error on remove file to tmp", errRemove)
+		utils.RegisterLog("[UPLOAD ALBUM THUMB TO S3] Line 217:", errRemove.Error())
+
+		return "", errRemove
 	}
+
+	return fileUrl, nil
 }
