@@ -42,6 +42,7 @@ func ConfigureRoutes(router *gin.Engine) *gin.Engine {
 			albumGroup.POST("", albums.HandlerStore)
 			albumGroup.DELETE(":albumId", albums.HandlerDestroy)
 			albumGroup.PUT(":albumId", albums.HandlerUpdate)
+			albumGroup.GET(":albumId", albums.HandlerShow)
 		}
 
 		solicitationGroup := firstVersion.Group("socilicitations", middlewares.AuthMiddleware())
@@ -51,10 +52,10 @@ func ConfigureRoutes(router *gin.Engine) *gin.Engine {
 
 		snapsGroup := firstVersion.Group("snaps", middlewares.AuthMiddleware())
 		{
-			snapsGroup.GET("", snaps.HandlerIndex)
+			snapsGroup.GET(":albumId", snaps.HandlerIndex)
 			snapsGroup.POST("", snaps.HandlerStore)
 			snapsGroup.DELETE(":snapId", snaps.HandlerDestroy)
-			snapsGroup.GET(":albumId", snaps.HandlerShow)
+			snapsGroup.GET(":albumId/today", snaps.HandlerShow)
 		}
 	}
 

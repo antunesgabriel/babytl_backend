@@ -115,6 +115,10 @@ func HandlerIndex(c *gin.Context) {
 		return
 	}
 
+	for idx, album := range albums {
+		albums[idx].SnapsCount = db.Model(&album).Association("Snaps").Count()
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"albums": albums,
 	})
@@ -194,6 +198,36 @@ func HandlerDestroy(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "DELETED",
 		"album":   album,
+	})
+}
+
+func HandlerShow(c *gin.Context) {
+	albumId, err := strconv.Atoi(c.Param("albumId"))
+
+	db := database.GetDatabase()
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "INVALID_PARAMS",
+		})
+
+		return
+	}
+
+	var album entities.Album
+
+	findError := db.Preload("Snaps").First(&album, albumId).Error
+
+	if findError != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "NOT_FOUND",
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"album": album,
 	})
 }
 

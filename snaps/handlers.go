@@ -23,10 +23,9 @@ const FOLDER = "snaps"
 func HandlerIndex(c *gin.Context) {
 	db := database.GetDatabase()
 
-	albumId, err1 := strconv.Atoi(c.Query("albumId"))
-	month, err2 := time.Parse("2006-01-02", c.Query("month"))
+	albumId, err1 := strconv.Atoi(c.Param("albumId"))
 
-	if err1 != nil || err2 != nil {
+	if err1 != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"message": "INVALID_PARAMS",
 		})
@@ -36,9 +35,7 @@ func HandlerIndex(c *gin.Context) {
 
 	var snaps []entities.Snap
 
-	now := time.Now()
-
-	if db.Where("created_at BETWEEN ? AND ? AND album_id = ?", month, now, albumId).Find(&snaps).Error != nil {
+	if db.Where("album_id = ?", albumId).Find(&snaps).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": "INTERNAL",
 		})
@@ -223,7 +220,7 @@ func workerUpload(dir string, snapId uint, albumId uint) {
 	}
 }
 
-func HandlerShow (c *gin.Context) {
+func HandlerShow(c *gin.Context) {
 	albumId, err := strconv.Atoi(c.Param("albumId"))
 
 	if err != nil {

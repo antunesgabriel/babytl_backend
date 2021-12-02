@@ -20,7 +20,7 @@ func HandlerStore(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "INVALID_ARGUMENTS",
+			"error": "INVALID_PARAMS",
 		})
 
 		return
