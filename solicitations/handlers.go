@@ -168,12 +168,12 @@ func buildMessageDiff(diff time.Duration, isPremium bool) (message string) {
 	date := time.Now().Add(diff)
 
 	if isPremium {
-		message = "Sua próxima data de solicitação para este album será no dia: " + date.Format("02/01/2006") + " ás: " + date.Format("15:04") + "hrs"
+		message = "Próxima solicitação: " + date.Format("02/01/2006") + " ás: " + date.Format("15:04") + "hrs"
 
 		return
 	}
 
-	message = "Sua próxima data de solicitação será no dia: " + date.Format("02/01/2006") + " ás: " + date.Format("15:04") + "hrs"
+	message = "Próxima solicitação: " + date.Format("02/01/2006") + " ás: " + date.Format("15:04") + "hrs"
 
 	return
 }
