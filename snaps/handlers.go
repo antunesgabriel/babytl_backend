@@ -95,9 +95,8 @@ func HandlerStore(c *gin.Context) {
 			"_details": result.Error.Error(),
 		})
 
-		return	
+		return
 	}
-
 
 	oldFilename := filepath.Base(snapFile.Filename)
 	ext := filepath.Ext(oldFilename)
@@ -117,7 +116,6 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
-	
 	var album entities.Album
 	var snap entities.Snap
 
@@ -239,7 +237,7 @@ func HandlerShow(c *gin.Context) {
 	year, month, day := timeNow.Date()
 
 	startDay := time.Date(year, month, day, 0, 0, 0, 0, timeNow.Location())
-	endDay := time.Date(year, month, day, 23, 59, 59, 0, timeNow.Location())
+	endDay := time.Date(year, month, day, 23, 58, 58, 0, timeNow.Location())
 
 	errFirst := db.First(&snap, "album_id = ? AND created_at BETWEEN ? AND ?", albumId, startDay, endDay).Error
 
@@ -253,14 +251,14 @@ func HandlerShow(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK,  gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"snap": nil,
 		})
-		
+
 		return
 	}
 
-	c.JSON(http.StatusOK,  gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"snap": snap,
 	})
 }
