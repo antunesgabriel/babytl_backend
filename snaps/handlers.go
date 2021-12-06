@@ -3,7 +3,6 @@ package snaps
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -131,6 +130,18 @@ func HandlerStore(c *gin.Context) {
 	snap.AlbumID = album.ID
 	snap.Album = album
 
+	snapUrl, errUpload := workerUpload(dir, snap.ID, snap.AlbumID)
+
+	if errUpload != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "INTERNAL",
+		})
+
+		return
+	}
+
+	snap.SnapUrl = snapUrl
+
 	if db.Create(&snap).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":    "INTERNAL",
@@ -140,10 +151,9 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
-	go workerUpload(dir, snap.ID, snap.AlbumID)
-
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "CREATED",
+		"snap": snap,
 	})
 }
 
@@ -176,25 +186,16 @@ func HandlerDestroy(c *gin.Context) {
 	})
 }
 
-func workerUpload(dir string, snapId uint, albumId uint) {
+func workerUpload(dir string, snapId uint, albumId uint) (string, error) {
 	fmt.Println("INIT ROUTINE")
 	defer fmt.Println("FINISH ROUTINE")
-
-	db := database.GetDatabase()
-	var snap entities.Snap
-
-	if db.First(&snap, snapId).Error != nil {
-		log.Fatalln("error on acess snap")
-
-		return
-	}
 
 	s3Handler, err := utils.NewS3Handler()
 
 	if err != nil {
-		log.Fatalf("[error] on connect s3: %s", err.Error())
+		utils.RegisterLog("[UPLOAD SNAP - LINE: 183]", err.Error())
 
-		return
+		return "", err
 	}
 
 	folder := path.Join(FOLDER, fmt.Sprint("ALBUM_ID_", albumId))
@@ -202,20 +203,18 @@ func workerUpload(dir string, snapId uint, albumId uint) {
 	fileUrl, errUpload := s3Handler.UploadFile(dir, folder)
 
 	if errUpload != nil {
-		log.Fatalf("error on upload s3: %v", errUpload)
+		utils.RegisterLog("[UPLOAD SNAP - LINE: 192]", errUpload.Error())
 
-		return
+		return "", errUpload
 	}
-
-	snap.SnapUrl = fileUrl
-
-	db.Save(&snap)
 
 	errRemove := os.Remove(dir)
 
 	if errRemove != nil {
-		fmt.Println("error on remove file to tmp", errRemove)
+		utils.RegisterLog("[UPLOAD SNAP - LINE: 200]", err.Error())
 	}
+
+	return fileUrl, nil
 }
 
 func HandlerShow(c *gin.Context) {
