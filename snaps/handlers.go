@@ -77,12 +77,13 @@ func HandlerStore(c *gin.Context) {
 
 	var snapExist entities.Snap
 
-	result := db.First(&snapExist, "created_at BETWEEN ? AND ?", startDay, endDay)
+	result := db.First(&snapExist, "album_id = ? AND created_at BETWEEN ? AND ?", albumId, startDay, endDay)
+	errFind := result.Error
 
-	if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+	if errFind != nil && !errors.Is(errFind, gorm.ErrRecordNotFound) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":    "INTERNAL",
-			"_details": result.Error.Error(),
+			"_details": errFind.Error(),
 		})
 
 		return
@@ -90,8 +91,9 @@ func HandlerStore(c *gin.Context) {
 
 	if result.RowsAffected > 0 {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"error":    "Já foi feito um registro para o dia de hoje.",
-			"_details": result.Error.Error(),
+			"message":    "Já foi feito um registro para o dia de hoje.",
+			"snap": snapExist,
+			"error": "NOT_PERMITED_SNAP",
 		})
 
 		return
@@ -150,6 +152,8 @@ func HandlerStore(c *gin.Context) {
 
 		return
 	}
+
+	fmt.Println("=== Upload Feito")
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "CREATED",
