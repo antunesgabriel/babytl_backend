@@ -74,8 +74,6 @@ func HandlerStore(c *gin.Context) {
 	album.UserID = user.ID
 	album.User = user
 
-
-
 	thumbUrl, errUpload := workerUpload(dir, album.ID, db)
 
 	if errUpload != nil {
@@ -231,7 +229,7 @@ func HandlerShow(c *gin.Context) {
 	})
 }
 
-func workerUpload(dir string, albumId uint, db *gorm.DB ) (string, error) {
+func workerUpload(dir string, albumId uint, db *gorm.DB) (string, error) {
 	s3Handler, err := utils.NewS3Handler()
 
 	if err != nil {

@@ -17,7 +17,7 @@ type User struct {
 	Password      string         `json:"password" gorm:"type:varchar(255);not null"`
 	Premium       bool           `json:"premium" gorm:"bool"`
 	Phone         string         `json:"phone" gorm:"type:varchar(255)"`
-	BirthDate     *time.Time      `json:"birthDate"`
+	BirthDate     *time.Time     `json:"birthDate"`
 	Albums        []Album        `json:"albums"`
 	Solicitations []Solicitation `json:"solicitations"`
 }

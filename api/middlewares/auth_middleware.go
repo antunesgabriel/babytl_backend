@@ -9,7 +9,7 @@ import (
 )
 
 func AuthMiddleware() gin.HandlerFunc {
-	return func (c *gin.Context) {
+	return func(c *gin.Context) {
 		const BEARER_SCHEMA = "Bearer "
 
 		authorization := c.GetHeader("Authorization")

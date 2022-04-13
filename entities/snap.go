@@ -7,5 +7,5 @@ type Snap struct {
 	FileName string `json:"fileName" gorm:"type:varchar(255);not null"`
 	SnapUrl  string `json:"snapUrl" gorm:"type:varchar(255)"`
 	AlbumID  uint   `json:"albumId"`
-	Album    Album `json:"album" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Album    Album  `json:"album" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

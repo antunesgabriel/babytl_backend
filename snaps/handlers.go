@@ -91,9 +91,9 @@ func HandlerStore(c *gin.Context) {
 
 	if result.RowsAffected > 0 {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message":    "Já foi feito um registro para o dia de hoje.",
-			"snap": snapExist,
-			"error": "NOT_PERMITED_SNAP",
+			"message": "Já foi feito um registro para o dia de hoje.",
+			"snap":    snapExist,
+			"error":   "NOT_PERMITED_SNAP",
 		})
 
 		return
@@ -157,7 +157,7 @@ func HandlerStore(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "CREATED",
-		"snap": snap,
+		"snap":    snap,
 	})
 }
 
