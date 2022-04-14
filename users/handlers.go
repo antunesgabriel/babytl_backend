@@ -2,19 +2,19 @@ package users
 
 import (
 	"errors"
+	"github.com/antunesgabriel/babytl_backend/src/infrastructure/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
 	"github.com/antunesgabriel/babytl_backend/database"
-	"github.com/antunesgabriel/babytl_backend/entities"
 )
 
 func HandlerStore(c *gin.Context) {
 	db := database.GetDatabase()
 
-	var user entities.User
+	var user models.User
 
 	err := c.ShouldBindJSON(&user)
 
@@ -26,7 +26,7 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
-	var exist entities.User
+	var exist models.User
 
 	result := db.First(&exist, "email = ?", user.Email)
 
@@ -63,7 +63,7 @@ func HandlerShow(c *gin.Context) {
 	db := database.GetDatabase()
 	userId := c.GetUint("authId")
 
-	var user entities.User
+	var user models.User
 
 	if db.Where("ID = ?", userId).First(&user).Error != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -83,7 +83,7 @@ func HandlerUpdate(c *gin.Context) {
 
 	db := database.GetDatabase()
 
-	var user entities.User
+	var user models.User
 	var updateUserDTO UpdateUserDTO
 
 	if c.ShouldBindJSON(&updateUserDTO) != nil {

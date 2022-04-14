@@ -2,13 +2,13 @@ package solicitations
 
 import (
 	"fmt"
+	models2 "github.com/antunesgabriel/babytl_backend/src/infrastructure/models"
 	"net/http"
 	"os"
 	"path"
 	"time"
 
 	"github.com/antunesgabriel/babytl_backend/database"
-	"github.com/antunesgabriel/babytl_backend/entities"
 	"github.com/antunesgabriel/babytl_backend/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -34,9 +34,9 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
-	var user entities.User
-	var solicitations []entities.Solicitation
-	var album entities.Album
+	var user models2.User
+	var solicitations []models2.Solicitation
+	var album models2.Album
 
 	if db.Where("ID = ?", authId).First(&user).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -129,7 +129,7 @@ func HandlerStore(c *gin.Context) {
 		}
 	}
 
-	var newSolicitation entities.Solicitation
+	var newSolicitation models2.Solicitation
 
 	newSolicitation.AlbumID = album.ID
 	newSolicitation.Album = album
@@ -185,7 +185,7 @@ func workerSolicitation(albumId, solicitationId uint) {
 
 	db := database.GetDatabase()
 
-	var snaps []entities.Snap
+	var snaps []models2.Snap
 
 	if err := db.Where("album_id = ?", albumId).Find(&snaps).Error; err != nil {
 		indentify := fmt.Sprintf("WORKER_SOLICITATION - ON SELECT SNAPS ALBUM_ID: %s", fmt.Sprint(albumId))
@@ -240,7 +240,7 @@ func workerSolicitation(albumId, solicitationId uint) {
 		return
 	}
 
-	var solicitation entities.Solicitation
+	var solicitation models2.Solicitation
 
 	if err := db.First(&solicitation, solicitationId).Error; err != nil {
 		indentify := fmt.Sprintf("WORKER_SOLICITATION - ON CLOSE ZIP ALBUM_ID: %s", fmt.Sprint(albumId))

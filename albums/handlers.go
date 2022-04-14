@@ -2,6 +2,7 @@ package albums
 
 import (
 	"fmt"
+	models2 "github.com/antunesgabriel/babytl_backend/src/infrastructure/models"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/antunesgabriel/babytl_backend/database"
-	"github.com/antunesgabriel/babytl_backend/entities"
 	"github.com/antunesgabriel/babytl_backend/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -19,8 +19,8 @@ const FOLDER = "thumbs"
 
 func HandlerStore(c *gin.Context) {
 	db := database.GetDatabase()
-	var album entities.Album
-	var user entities.User
+	var album models2.Album
+	var user models2.User
 
 	title := c.PostForm("title")
 	gender := c.PostForm("gender")
@@ -103,7 +103,7 @@ func HandlerIndex(c *gin.Context) {
 	db := database.GetDatabase()
 	authId := c.GetUint("authId")
 
-	var albums []entities.Album
+	var albums []models2.Album
 
 	if db.Where("user_id = ?", authId).Find(&albums).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -144,7 +144,7 @@ func HandlerUpdate(c *gin.Context) {
 		return
 	}
 
-	var album entities.Album
+	var album models2.Album
 
 	if db.Where("ID = ?", albumId).First(&album).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -183,7 +183,7 @@ func HandlerDestroy(c *gin.Context) {
 		return
 	}
 
-	var album entities.Album
+	var album models2.Album
 
 	if db.Where("ID = ?", albumId).Delete(&album).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -212,7 +212,7 @@ func HandlerShow(c *gin.Context) {
 		return
 	}
 
-	var album entities.Album
+	var album models2.Album
 
 	findError := db.Preload("Snaps").First(&album, albumId).Error
 

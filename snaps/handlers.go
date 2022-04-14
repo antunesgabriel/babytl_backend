@@ -3,6 +3,7 @@ package snaps
 import (
 	"errors"
 	"fmt"
+	models2 "github.com/antunesgabriel/babytl_backend/src/infrastructure/models"
 	"net/http"
 	"os"
 	"path"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"github.com/antunesgabriel/babytl_backend/database"
-	"github.com/antunesgabriel/babytl_backend/entities"
 	"github.com/antunesgabriel/babytl_backend/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -32,7 +32,7 @@ func HandlerIndex(c *gin.Context) {
 		return
 	}
 
-	var snaps []entities.Snap
+	var snaps []models2.Snap
 
 	if db.Where("album_id = ?", albumId).Find(&snaps).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -75,7 +75,7 @@ func HandlerStore(c *gin.Context) {
 	startDay := time.Date(year, month, day, 0, 0, 0, 0, timeNow.Location())
 	endDay := time.Date(year, month, day, 23, 59, 59, 0, timeNow.Location())
 
-	var snapExist entities.Snap
+	var snapExist models2.Snap
 
 	result := db.First(&snapExist, "album_id = ? AND created_at BETWEEN ? AND ?", albumId, startDay, endDay)
 	errFind := result.Error
@@ -117,8 +117,8 @@ func HandlerStore(c *gin.Context) {
 		return
 	}
 
-	var album entities.Album
-	var snap entities.Snap
+	var album models2.Album
+	var snap models2.Snap
 
 	if db.First(&album, albumId).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -174,7 +174,7 @@ func HandlerDestroy(c *gin.Context) {
 
 	db := database.GetDatabase()
 
-	var snap entities.Snap
+	var snap models2.Snap
 
 	if db.Where("ID = ?", snapId).Delete(&snap).Error != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -234,7 +234,7 @@ func HandlerShow(c *gin.Context) {
 
 	db := database.GetDatabase()
 
-	var snap entities.Snap
+	var snap models2.Snap
 
 	timeNow := time.Now()
 	year, month, day := timeNow.Date()

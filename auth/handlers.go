@@ -1,11 +1,11 @@
 package auth
 
 import (
+	"github.com/antunesgabriel/babytl_backend/src/infrastructure/models"
 	"net/http"
 
 	"github.com/antunesgabriel/babytl_backend/configs"
 	"github.com/antunesgabriel/babytl_backend/database"
-	"github.com/antunesgabriel/babytl_backend/entities"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +20,7 @@ func HandlerLoginWithEmail(c *gin.Context) {
 		return
 	}
 
-	var user entities.User
+	var user models.User
 	db := database.GetDatabase()
 
 	if err := db.Where("email = ?", authDTO.Email).First(&user).Error; err != nil {
