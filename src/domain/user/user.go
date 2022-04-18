@@ -18,13 +18,14 @@ type User struct {
 	birthDate  *time.Time
 }
 
-func NewUser(firstName, lastName, email, password string) (*User, error) {
+func NewUser(firstName, lastName, email, password string, id uint) (*User, error) {
 	user := new(User)
 
 	user.firstName = strings.TrimSpace(firstName)
 	user.lastName = strings.TrimSpace(lastName)
 	user.email = strings.TrimSpace(email)
 	user.password = strings.TrimSpace(password)
+	user.id = id
 
 	err := user.validation()
 

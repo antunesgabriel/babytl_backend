@@ -10,7 +10,7 @@ type UseCase struct {
 }
 
 func (uc *UseCase) CreateUser(firstName, lastName, email, password string) error {
-	user, err := NewUser(firstName, lastName, email, password)
+	user, err := NewUser(firstName, lastName, email, password, 0)
 
 	if err != nil {
 		return err

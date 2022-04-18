@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"github.com/antunesgabriel/babytl_backend/src/domain/user"
+	u "github.com/antunesgabriel/babytl_backend/src/domain/user"
 	"github.com/antunesgabriel/babytl_backend/src/infrastructure/models"
 	"gorm.io/gorm"
 )
@@ -10,7 +10,7 @@ type UserRepositoryImpl struct {
 	DB *gorm.DB
 }
 
-func (ur *UserRepositoryImpl) Create(user user.User) error {
+func (ur *UserRepositoryImpl) Create(user u.User) error {
 	userModel := models.User{
 		FirstName: user.FirstName(),
 		LastName:  user.LastName(),
@@ -24,7 +24,7 @@ func (ur *UserRepositoryImpl) Create(user user.User) error {
 	return err
 }
 
-func (ur *UserRepositoryImpl) Update(user user.User) error {
+func (ur *UserRepositoryImpl) Update(user u.User) error {
 	var userModel models.User
 
 	if err := ur.DB.First(&userModel, "ID = ?", user.ID()).Error; err != nil {
@@ -44,37 +44,46 @@ func (ur *UserRepositoryImpl) Update(user user.User) error {
 	return err
 }
 
-func (ur *UserRepositoryImpl) FindByEmail(email string) (*user.User, error) {
+func (ur *UserRepositoryImpl) FindByEmail(email string) (*u.User, error) {
 	var userModel models.User
 
 	if err := ur.DB.First(&userModel, "email = ?", email).Error; err != nil {
-		return new(user.User), err
+		return nil, err
 	}
 
-	user := ur.parseModelToEntity(userModel)
+	user, err := ur.parseModelToEntity(userModel)
 
-	return user, nil
+	return user, err
 }
 
-func (ur *UserRepositoryImpl) FindById(id uint) (*user.User, error) {
+func (ur *UserRepositoryImpl) FindById(id uint) (*u.User, error) {
 	var userModel models.User
 
 	if err := ur.DB.First(&userModel, "ID = ?", id).Error; err != nil {
-		return new(user.User), err
+		return nil, err
 	}
 
-	user := ur.parseModelToEntity(userModel)
+	user, err := ur.parseModelToEntity(userModel)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return user, nil
 }
 
-func (ur *UserRepositoryImpl) parseModelToEntity(userModel models.User) *user.User {
-	user := user.NewUser(
+func (ur *UserRepositoryImpl) parseModelToEntity(userModel models.User) (*u.User, error) {
+	user, err := u.NewUser(
 		userModel.FirstName,
 		userModel.LastName,
 		userModel.Email,
 		userModel.Password,
+		userModel.ID,
 	)
+
+	if err != nil {
+		return nil, err
+	}
 
 	user.AddWhatsApp(userModel.WhatsApp)
 
@@ -86,5 +95,5 @@ func (ur *UserRepositoryImpl) parseModelToEntity(userModel models.User) *user.Us
 
 	user.DefineBirthDate(userModel.BirthDate)
 
-	return user
+	return user, nil
 }
