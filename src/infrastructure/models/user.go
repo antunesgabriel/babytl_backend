@@ -16,7 +16,7 @@ type User struct {
 	FirebaseId    string         `json:"firebaseId" gorm:"type:varchar(255)"`
 	Password      string         `json:"password" gorm:"type:varchar(255);not null"`
 	Premium       bool           `json:"premium" gorm:"bool"`
-	Phone         string         `json:"phone" gorm:"type:varchar(255)"`
+	WhatsApp      string         `json:"whatsApp" gorm:"type:varchar(255)"`
 	BirthDate     *time.Time     `json:"birthDate"`
 	Albums        []Album        `json:"albums"`
 	Solicitations []Solicitation `json:"solicitations"`

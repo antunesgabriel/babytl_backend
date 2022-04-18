@@ -10,19 +10,19 @@ type UseCase struct {
 }
 
 func (uc *UseCase) CreateUser(firstName, lastName, email, password string) error {
-	user, err := NewUser(firstName, lastName, email, password)
+	user := NewUser(firstName, lastName, email, password)
 
 	if err != nil {
 		return err
 	}
 
-	exist, err := uc.Repository.FindByEmail(user.Email)
+	exist, err := uc.Repository.FindByEmail(user.Email())
 
 	if err != nil {
 		return err
 	}
 
-	if exist.Email != "" {
+	if exist.Email() != "" {
 		return errors.New("email has been in using")
 	}
 
@@ -38,7 +38,7 @@ func (uc *UseCase) AddMoreUserInfo(id uint, phone string, birthDate *time.Time) 
 		return err
 	}
 
-	user.AddContact(phone)
+	user.AddWhatsApp(phone)
 	user.DefineBirthDate(birthDate)
 
 	err = uc.Repository.Update(user)

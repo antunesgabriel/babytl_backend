@@ -12,10 +12,10 @@ type UserRepositoryImpl struct {
 
 func (ur *UserRepositoryImpl) Create(user user.User) error {
 	userModel := models.User{
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		Password:  user.Password,
+		FirstName: user.FirstName(),
+		LastName:  user.LastName(),
+		Email:     user.Email(),
+		Password:  user.Password(),
 		Premium:   false,
 	}
 
@@ -27,17 +27,17 @@ func (ur *UserRepositoryImpl) Create(user user.User) error {
 func (ur *UserRepositoryImpl) Update(user user.User) error {
 	var userModel models.User
 
-	if err := ur.DB.First(&userModel, "ID = ?", user.Id).Error; err != nil {
+	if err := ur.DB.First(&userModel, "ID = ?", user.ID()).Error; err != nil {
 		return err
 	}
 
-	userModel.ID = user.Id
-	userModel.FirstName = user.FirstName
-	userModel.LastName = user.LastName
-	userModel.Email = user.Email
-	userModel.Premium = user.Premium
-	userModel.BirthDate = user.BirthDate
-	userModel.Password = user.Password
+	userModel.ID = user.ID()
+	userModel.FirstName = user.FirstName()
+	userModel.LastName = user.LastName()
+	userModel.Email = user.Email()
+	userModel.Premium = user.IsPremium()
+	userModel.BirthDate = user.BirthDate()
+	userModel.Password = user.Password()
 
 	err := ur.DB.Save(&userModel).Error
 
@@ -51,18 +51,9 @@ func (ur *UserRepositoryImpl) FindByEmail(email string) (*user.User, error) {
 		return new(user.User), err
 	}
 
-	user := user.User{
-		Id:        userModel.ID,
-		FirstName: userModel.FirstName,
-		LastName:  userModel.LastName,
-		Email:     userModel.Email,
-		Password:  userModel.Password,
-		Premium:   userModel.Premium,
-		BirthDate: userModel.BirthDate,
-		Phone:     userModel.Phone,
-	}
+	user := ur.parseModelToEntity(userModel)
 
-	return &user, nil
+	return user, nil
 }
 
 func (ur *UserRepositoryImpl) FindById(id uint) (*user.User, error) {
@@ -72,16 +63,28 @@ func (ur *UserRepositoryImpl) FindById(id uint) (*user.User, error) {
 		return new(user.User), err
 	}
 
-	user := user.User{
-		Id:        userModel.ID,
-		FirstName: userModel.FirstName,
-		LastName:  userModel.LastName,
-		Email:     userModel.Email,
-		Password:  userModel.Password,
-		Premium:   userModel.Premium,
-		BirthDate: userModel.BirthDate,
-		Phone:     userModel.Phone,
+	user := ur.parseModelToEntity(userModel)
+
+	return user, nil
+}
+
+func (ur *UserRepositoryImpl) parseModelToEntity(userModel models.User) *user.User {
+	user := user.NewUser(
+		userModel.FirstName,
+		userModel.LastName,
+		userModel.Email,
+		userModel.Password,
+	)
+
+	user.AddWhatsApp(userModel.WhatsApp)
+
+	if userModel.Premium {
+		user.ActivePremium()
+	} else {
+		user.DisablePremium()
 	}
 
-	return &user, nil
+	user.DefineBirthDate(userModel.BirthDate)
+
+	return user
 }

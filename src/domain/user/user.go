@@ -7,62 +7,98 @@ import (
 )
 
 type User struct {
-	Id         uint
-	FirstName  string
-	LastName   string
-	Email      string
-	FirebaseId string
-	Password   string
-	Premium    bool
-	Phone      string
-	BirthDate  *time.Time
+	id         uint
+	firstName  string
+	lastName   string
+	email      string
+	firebaseId string
+	password   string
+	premium    bool
+	whatsApp   string
+	birthDate  *time.Time
 }
 
-func NewUser(firstName, lastName, email, password string) (*User, error) {
+func NewUser(firstName, lastName, email, password string) *User {
 	user := new(User)
 
-	user.FirstName = strings.TrimSpace(firstName)
-	user.LastName = strings.TrimSpace(lastName)
-	user.Email = strings.TrimSpace(email)
-	user.Password = strings.TrimSpace(password)
+	user.firstName = strings.TrimSpace(firstName)
+	user.lastName = strings.TrimSpace(lastName)
+	user.email = strings.TrimSpace(email)
+	user.password = strings.TrimSpace(password)
 
 	err := user.validation()
 
-	return user, err
+	return user
+}
+
+func (u *User) ID() uint {
+	return u.id
+}
+
+func (u *User) FirstName() string {
+	return u.firstName
+}
+
+func (u *User) LastName() string {
+	return u.lastName
+}
+
+func (u *User) Email() string {
+	return u.email
+}
+
+func (u *User) FirebaseId() string {
+	return u.firebaseId
+}
+
+func (u *User) Password() string {
+	return u.password
+}
+
+func (u *User) IsPremium() bool {
+	return u.premium
+}
+
+func (u *User) WhatsApp() string {
+	return u.whatsApp
+}
+
+func (u *User) BirthDate() *time.Time {
+	return u.birthDate
 }
 
 func (u *User) validation() error {
-	if u.Email == "" {
+	if u.email == "" {
 		return errors.New("email is required")
 	}
 
-	if u.FirstName == "" {
+	if u.firstName == "" {
 		return errors.New("email is required")
 	}
 
-	if u.LastName == "" {
+	if u.lastName == "" {
 		return errors.New("email is required")
 	}
 
-	if u.Password == "" {
+	if u.password == "" {
 		return errors.New("email is required")
 	}
 
 	return nil
 }
 
-func (u *User) AddContact(phone string) {
-	u.Phone = phone
+func (u *User) AddWhatsApp(whatsApp string) {
+	u.whatsApp = whatsApp
 }
 
 func (u *User) DefineBirthDate(birthDate *time.Time) {
-	u.BirthDate = birthDate
+	u.birthDate = birthDate
 }
 
 func (u *User) ActivePremium() {
-	u.Premium = true
+	u.premium = true
 }
 
 func (u *User) DisablePremium() {
-	u.Premium = true
+	u.premium = false
 }
