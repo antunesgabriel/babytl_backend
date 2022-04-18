@@ -18,7 +18,7 @@ type User struct {
 	birthDate  *time.Time
 }
 
-func NewUser(firstName, lastName, email, password string) *User {
+func NewUser(firstName, lastName, email, password string) (*User, error) {
 	user := new(User)
 
 	user.firstName = strings.TrimSpace(firstName)
@@ -28,7 +28,7 @@ func NewUser(firstName, lastName, email, password string) *User {
 
 	err := user.validation()
 
-	return user
+	return user, err
 }
 
 func (u *User) ID() uint {
