@@ -1,4 +1,4 @@
-package repositories
+package repoimp
 
 import (
 	u "github.com/antunesgabriel/babytl_backend/src/domain/user"

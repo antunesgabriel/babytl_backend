@@ -13,12 +13,13 @@ type Album struct {
 	userId   uint
 }
 
-func NewAlbum(userId uint, title, thumbUrl, gender string) (*Album, error) {
+func NewAlbum(userId uint, title, thumbUrl, gender string, id uint) (*Album, error) {
 	album := &Album{
 		title:    title,
 		thumbUrl: thumbUrl,
 		gender:   gender,
 		userId:   userId,
+		id:       id,
 	}
 
 	err := album.Validate()

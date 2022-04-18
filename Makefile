@@ -21,5 +21,5 @@ start:
 dev:
 	go run .
 
-clear:
+clean:
 	go mod tidy

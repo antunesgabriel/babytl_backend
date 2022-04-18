@@ -10,4 +10,6 @@ type Repository interface {
 	Destroy(albumId uint) error
 
 	FindById(id uint) (*Album, error)
+
+	FindByUserIdAndAlbumId(userId, albumId uint) (*Album, error)
 }

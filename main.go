@@ -5,9 +5,6 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-
-	"github.com/antunesgabriel/babytl_backend/api"
-	"github.com/antunesgabriel/babytl_backend/database"
 )
 
 func main() {
@@ -21,9 +18,4 @@ func main() {
 		}
 	}
 
-	database.StartDabate()
-
-	server := api.BuildServer()
-
-	server.Run()
 }
